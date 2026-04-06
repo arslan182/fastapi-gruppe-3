@@ -59,9 +59,9 @@ class KioskRepository:
                     if kiosk is not None
                     else Slice(content=(), total_elements=0))
             if key == "name":
-                kiosk: Slice[Kiosk] = self._find_by_name(teil=value, pageable=pageable, session=session)
-                logger.debug(log_str, kiosk)
-                return kioske
+                kiosken: Slice[Kiosk] = self._find_by_name(teil=value, pageable=pageable, session=session)
+                logger.debug(log_str, kiosken)
+                return kiosken
         return Slice(content=(), total_elements=0)
 
     def _find_all(self, pageable: Pageable, session: Session) -> Slice[Kiosk]:
@@ -76,9 +76,9 @@ class KioskRepository:
             if pageable.size != 0
             else (select(Kiosk).options(joinedload(Kiosk.betreiber)))                   
         )
-        kioske: Final = (session.scalars(statement)).all()
+        kiosken: Final = (session.scalars(statement)).all()
         anzahl: Final = self._count_all_rows(session)
-        kiosk_slice: Final = Slice(content=tuple(kioske), total_elements=anzahl)
+        kiosk_slice: Final = Slice(content=tuple(kiosken), total_elements=anzahl)
         logger.debug("kiosk_slice={}", kiosk_slice)
         return kiosk_slice
     
@@ -108,7 +108,7 @@ class KioskRepository:
         session: Session,
     ) -> Slice[Kiosk]:
         logger.debug("teil={}", teil)
-        offset = pageable.number * pageable.size
+        offset: int = pageable.number * pageable.size
         # https://docs.sqlalchemy.org/en/20/orm/session_basics.html#querying
         statement: Final = (
             (
@@ -131,7 +131,7 @@ class KioskRepository:
         logger.debug("{}", kiosk_slice)
         return kiosk_slice
 
-    def _count_rows_nachname(self, teil: str, session: Session) -> int:
+    def _count_rows_name(self, teil: str, session: Session) -> int:
         statement: Final = (
             select(func.count())
             .select_from(Kiosk)
@@ -185,10 +185,10 @@ class KioskRepository:
         :rtype: Kiosk
         """
         logger.debug(
-            "kiosk={}, kiosk.adresse={}, kiosk.rechnungen={}",
+            "kiosk={}, kiosk.betreiber={}, kiosk.produkte={}",
             kiosk,
-            kiosk.adresse,
-            kiosk.rechnungen,
+            kiosk.betreiber,
+            kiosk.produkte,
         )
         # https://docs.sqlalchemy.org/en/20/orm/session_basics.html#adding-new-or-existing-items
         session.add(instance=kiosk)
@@ -236,12 +236,12 @@ class KioskRepository:
         session.delete(kiosk)
         logger.debug("ok")
 
-    def find_nachnamen(self, teil: str, session: Session) -> Sequence[str]:
-        """Suche Nachnamen zu einem Teilstring.
+    def find_namen(self, teil: str, session: Session) -> Sequence[str]:
+        """Suche Namen zu einem Teilstring.
 
-        :param teil: Teilstring zu den gesuchten Nachnamen
+        :param teil: Teilstring zu den gesuchten Namen
         :param session: Session für SQLAlchemy
-        :return: Liste der gefundenen Nachnamen oder eine leere Liste
+        :return: Liste der gefundenen Namen oder eine leere Liste
         :rtype: Sequence[str]
         """
         logger.debug("teil={}", teil)
